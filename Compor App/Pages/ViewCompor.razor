@@ -1,0 +1,101 @@
+﻿@page "/viewCompors"
+
+@using Compor_App.Data
+
+@using Compor_App.Components
+
+@using System.Data;
+
+@using Microsoft.AspNetCore.Components.Authorization;
+
+@inject ComporServices comporServices
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+ 
+
+ 
+
+@code{
+
+    public string? currentUser = "";
+
+ 
+
+    //Get All Compor Definitions
+
+    DataTable comporsDT = new DataTable();
+
+    async void GetTableAsync()
+
+    {
+
+        comporsDT = await comporServices.GetAllCompers(comporsDT);
+
+    }
+
+    private async void GetUserName(){
+
+        AuthenticationState authUser = await (AuthenticationStateProvider.GetAuthenticationStateAsync()); 
+
+        currentUser = comporServices.StripDomainFromName(authUser?.User?.Identity?.Name?.ToString());
+
+    }
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        GetTableAsync();
+
+        GetUserName();
+
+    }       
+
+}
+
+ 
+
+ 
+
+@if (comporsDT.Rows.Count < 1)
+
+{
+
+    <h1>....loading</h1>
+
+}
+
+else
+
+{
+
+    <div class="uk-container uk-margin-large-top">
+
+        <div uk-grid="true">
+
+            <div class="uk-width-1-1">
+
+                <h1 class="uk-text-center">Compor Definition Table</h1>
+
+                <div id="sortAlert" class="uk-alert-primary" uk-alert>
+
+                    <a class="uk-alert-close" uk-close></a>
+
+                    <p class="uk-text-center">Click on the column headers to sort by column.</p>
+
+                </div>
+
+            </div>          
+
+        </div>    
+
+    </div>
+
+    <div>
+
+        <Table comporsDT="@comporsDT" currentUser="@currentUser"></Table>
+
+    </div>
+
+}

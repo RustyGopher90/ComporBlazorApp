@@ -1,0 +1,538 @@
+﻿@page "/addCompors"
+
+@using Compor_App.Data
+
+@using Microsoft.AspNetCore.Components.Authorization;
+
+@using System.Data;
+
+@inject IJSRuntime JsRuntime
+
+@inject ComporServices comporServices
+
+@inject NewComporModel comporModel
+
+@inject NavigationManager navigationManager
+
+@inject ILogger<AddCompor> Logger
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+
+@code {
+
+    public string? currentUser { get; set; }
+
+    //Alert
+
+    private void Alert(string message)
+
+    {
+
+        JsRuntime.InvokeVoidAsync("alert", message);
+
+    }
+
+
+
+    //Get departments and compor levels
+
+    private List<string> departments = new List<string>();
+
+    private List<string> comporLevels = new List<string>();
+
+
+
+    async void GetDepartments()
+
+    {
+
+        departments = await comporServices.GetDistinctDepartments();
+
+    }
+
+    async void GetComporLevels()
+
+    {
+
+        comporLevels = await comporServices.GetDistinctComporLevels();
+
+    }
+
+    private async void GetUserName()
+
+    {
+
+        AuthenticationState authUser = await (AuthenticationStateProvider.GetAuthenticationStateAsync());
+
+        currentUser = authUser?.User?.Identity?.Name?.ToString();
+
+    }
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        GetDepartments();
+
+        GetComporLevels();
+
+        GetUserName();
+
+    }
+
+
+
+    //Add a new Compor
+
+    private NewComporModel model = new NewComporModel();
+
+    async void AddComporToTable()
+
+    {
+
+        var result = await comporServices.AddCompor(model);
+
+        if (result != "worked")
+
+        {
+
+            Alert($"Error : {result}");
+
+        }
+        else
+        {
+
+            Alert($"You have sucessfully added {model.FirstName} {model.LastName}");
+
+            var logresult = await comporServices.LogComporChange(model, "added", false, currentUser, DateTime.Now);
+
+            if (logresult != "worked")
+
+            {
+
+                Alert($"Error adding log to table : {logresult}");
+
+            }
+
+            navigationManager.NavigateTo($"/viewCompors");
+
+        }
+
+    }
+
+
+
+    //Get first and last name from compor ID
+
+    private Tuple<string, string> comporDetails;
+
+    async void GetComporNameAndID()
+
+    {
+
+        try
+
+        {
+
+            comporDetails = await comporServices.GetComporName(model.EmployeeID);
+
+            if (comporDetails.Item1 == "")
+
+            {
+
+                Alert("There is no employee with that ID");
+
+            }
+
+        }
+
+        catch (Exception)
+
+        {
+
+            Alert($"Unable to generate a name and ID for employee id {model.EmployeeID}!");
+
+        }
+
+    }
+
+
+
+    private void SetFirstLastNameAndID(Tuple<string, string> comporNameAndId)
+
+    {
+
+        try
+
+        {
+
+            string[] nameParts = comporNameAndId.Item2.Split(",");
+
+            model.ComporID = comporNameAndId.Item1;
+
+            model.FirstName = nameParts[1].Trim();
+
+            model.LastName = nameParts[0].Trim();
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            Logger.LogError($"Unable to parse name : {comporNameAndId.Item2}! {ex.Message}");
+
+        }
+
+    }
+
+
+
+    private void SetValuesBasedOnComporLevel()
+    {
+
+        if (model.ComporLevel == "Senior Executive Host")
+
+        {
+
+            model.PercentageOverage = 4;
+
+            model.DollarOverage = 2000;
+
+            model.Department = "Player Development";
+
+            model.Enabled = "Y";
+
+        }
+
+        else if (model.ComporLevel == "Executive Host")
+
+        {
+
+            model.PercentageOverage = 3;
+
+            model.DollarOverage = 500;
+
+            model.Department = "Table Games";
+
+            model.Enabled = "Y";
+
+        }
+
+        else if (model.ComporLevel == "Player Development Executive")
+
+        {
+
+            model.PercentageOverage = 3;
+
+            model.DollarOverage = 500;
+
+            model.Department = "Table Games";
+
+            model.Enabled = "Y";
+
+        }
+
+        else if (model.ComporLevel == "Director of Asian Marketing")
+
+        {
+
+            model.PercentageOverage = 4;
+
+            model.DollarOverage = 2500;
+
+            model.Department = "Asian Marketing";
+
+            model.Enabled = "Y";
+
+        }
+
+        else if (model.ComporLevel.ToLower().Contains("table"))
+        {
+
+            model.PercentageOverage = 2;
+
+            model.DollarOverage = 250;
+
+            model.Department = "Table Games";
+
+            model.Enabled = "Y";
+
+        }
+
+        else if (model.ComporLevel.ToLower().Contains("cage"))
+
+        {
+
+            model.PercentageOverage = 2;
+
+            model.DollarOverage = 250;
+
+            model.Department = "Cage";
+
+            model.Enabled = "Y";
+
+        }
+
+        else
+        {
+
+            model.PercentageOverage = 2;
+
+            model.DollarOverage = 250;
+
+            model.Department = "Player Development";
+
+            model.Enabled = "Y";
+
+        }
+
+    }
+
+
+
+
+
+}
+
+
+
+
+
+<div class="uk-container">
+
+    <div uk-grid="true">
+
+        <div class="uk-width-1-1 uk-margin-large-top">
+
+            <h1 class="">Add Compor</h1>
+
+            <div id="addAlert" class="uk-alert-primary" uk-alert>
+
+                <a class="uk-alert-close" uk-close></a>
+
+                <p class="uk-text-center">
+
+                    Enter the Employee ID of the employee you would like to add.
+
+                    Then select the Compor level of that employee. The rest of the fields will auto
+
+                    generate. Feel free to make changes if the information is not correct.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="uk-width-1-2 ">
+
+            <div class="uk-container-small">
+
+                <form class="uk-form-stacked">
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Employee ID</label>
+
+                        <div class="uk-inline uk-width-1-2">
+
+                            <input value="@model.EmployeeID"
+                                   @onchange="@((ChangeEventArgs __e) =>
+
+                                    {
+
+                                        model.EmployeeID = __e?.Value?.ToString();
+
+                                        GetComporNameAndID();
+
+                                        if (comporDetails.Item1 != ""){
+
+                                            SetFirstLastNameAndID(comporDetails);
+
+                                        }
+
+                                    })"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">First Name</label>
+
+                        <div class="uk-inline uk-width-1-2">
+
+                            <input value="@model.FirstName"
+                                   @onchange="@((ChangeEventArgs __e) => model.FirstName = __e?.Value?.ToString())"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Last Name</label>
+
+                        <div class="uk-inline uk-width-1-2">
+
+                            <input value="@model.LastName"
+                                   @onchange="@((ChangeEventArgs __e) => model.LastName = __e?.Value?.ToString())"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Compor Level</label>
+
+                        <div>
+
+                            <select class="uk-select uk-width-1-2"
+                                    id="form-stacked-select"
+                                    @onchange="@((ChangeEventArgs __e) =>
+
+                                        {
+
+                                            model.ComporLevel = __e?.Value?.ToString();
+
+                                            SetValuesBasedOnComporLevel();
+
+                                        })"
+                                    value="@model.ComporLevel">
+
+                                @foreach (var comporLevel in comporLevels)
+
+                                {
+
+                                    <option value="@comporLevel">
+
+                                        @comporLevel
+
+                                    </option>
+
+                                }
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <div class="uk-width-1-2 ">
+
+            <div class="uk-container-small">
+
+                <form class="uk-form-stacked">
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Percent Overage</label>
+
+                        <div class="uk-inline uk-width-1-2">
+
+                            <input value="@model.PercentageOverage"
+                                   @onchange="@((ChangeEventArgs __e) => model.PercentageOverage = comporModel.TurnStringToDecimal(__e?.Value?.ToString()))"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Dollar Overage</label>
+
+                        <div class="uk-inline uk-width-1-2">
+
+                            <input value="@model.DollarOverage"
+                                   @onchange="@((ChangeEventArgs __e) => model.DollarOverage = comporModel.TurnStringToDecimal(__e?.Value?.ToString()))"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Department</label>
+
+                        <div>
+
+                            <select class="uk-select uk-width-1-2" id="form-stacked-select" @bind="model.Department">
+
+                                @foreach (var department in departments)
+
+                                {
+
+                                    <option value="@department">
+
+                                        @department
+
+                                    </option>
+
+                                }
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Enabled</label>
+
+                        <div>
+
+                            <select class="uk-select uk-width-1-2" id="form-stacked-select" @bind="model.Enabled">
+
+                                <option value="Y">
+
+                                    Yes
+
+                                </option>
+
+                                <option value="N">
+
+                                    No
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+
+                </form>
+
+                <button @onclick="@(e => AddComporToTable())"
+                        class="uk-button uk-button-primary uk-margin-medium-bottom uk-margin-small-top">
+
+                    Add Compor
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

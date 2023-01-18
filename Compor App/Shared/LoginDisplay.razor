@@ -1,0 +1,24 @@
+﻿<AuthorizeView>
+
+    <p id="userNameNav" style="color:white">
+
+        Hello, @StripDomainFromName(@context.User.Identity?.Name!)
+
+    </p>
+
+</AuthorizeView>
+
+
+
+@code {
+
+    private string StripDomainFromName(string name)
+    {
+
+        string justUserName = name.Replace("LINCOLNPARKRI\\", "");
+
+        return justUserName;
+
+    }
+
+}

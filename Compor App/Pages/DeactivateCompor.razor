@@ -1,0 +1,156 @@
+﻿@page "/deactivateCompors/{comporID}/{currentUser}"
+
+
+
+@using Compor_App.Data
+
+@inject ComporServices comporServices
+
+@inject NewComporModel comporModel
+
+@inject IJSRuntime JsRuntime
+
+@inject NavigationManager navigationManager
+
+
+
+@code {
+
+    [Parameter]
+
+    public string? comporID { get; set; }
+
+    [Parameter]
+
+    public string? currentUser { get; set; }
+
+
+
+    //Alerts
+
+    void Alert(string message)
+
+    {
+
+        JsRuntime.InvokeVoidAsync("alert", message);
+
+    }
+
+
+
+    //Get compor data
+
+    NewComporModel newComporModel = new NewComporModel();
+
+    async void GetCompor(string comporID)
+
+    {
+
+        newComporModel = await comporServices.GetACompor(comporID);
+
+        if (newComporModel.Department == "")
+
+        {
+
+            Alert($"There was an error getting Compor with ID {comporID}");
+
+        }
+
+    }
+
+
+
+    //Deactivate a Compor
+
+    async void DeactivateACompor()
+
+    {
+
+        var result = "";
+
+        if (comporID != null)
+
+        {
+
+            result = await comporServices.DeactivateCompor(comporID);
+
+        }
+
+        if (result != "worked")
+
+        {
+
+            Alert($"Error : {result}");
+
+        }
+
+        else
+
+        {
+
+            Alert($"You have sucessfully deactivated {newComporModel.FirstName} {newComporModel.LastName}");
+
+            var logresult = await comporServices.LogComporChange(newComporModel, "deactivated", true, currentUser, DateTime.Now);
+
+            if (logresult != "worked")
+
+            {
+
+                Alert($"Error adding log to table : {logresult}");
+
+            }
+
+            navigationManager.NavigateTo($"/viewCompors");
+
+        }
+
+    }
+
+
+
+    //on page load override function
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        if (comporID != null)
+        {
+
+            GetCompor(comporID);
+
+        }
+
+    }
+
+}
+
+
+
+<div id="" class="uk-container uk-margin-xlarge-top">
+
+    <div uk-grid="true">
+
+        <div class="uk-width-1-1 uk-margin-small-top">
+
+            <h1 class="uk-text-center">Deactivate Compor</h1>
+
+            <h3 class="uk-text-center">Are you sure you want to deactivate @newComporModel.FirstName @newComporModel.LastName?</h3>
+
+        </div>
+
+        <div id="deactivateButton" class="uk-container-xsmall">
+
+            <p uk-margin>
+
+                <button @onclick="@(e =>  navigationManager.NavigateTo($"/viewCompors"))" class="uk-button uk-button-secondary uk-button-large uk-margin-small-right">Cancel</button>
+
+                <button @onclick="@(e =>  DeactivateACompor())" class="uk-button uk-button-danger uk-button-large uk-margin-small-left">Deactivate</button>
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>

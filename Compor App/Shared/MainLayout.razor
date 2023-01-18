@@ -1,0 +1,126 @@
+﻿@inherits LayoutComponentBase
+
+@using System.Security.Claims
+
+@using System.Data;
+
+@using Microsoft.AspNetCore.Components.Authorization;
+
+@*@using System.DirectoryServices.AccountManagement;*@
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+
+<PageTitle>ComporDefinitionWebApp</PageTitle>
+
+
+
+@code {
+
+    private async void AuthenticateUser()
+    {
+
+        AuthenticationState currentUser = await (AuthenticationStateProvider.GetAuthenticationStateAsync());
+
+        if (currentUser?.User?.Identity?.Name?.ToString() != null)
+
+        {
+
+            SetAuthenticationGroup(currentUser);
+
+        }
+
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        AuthenticateUser();
+
+    }
+
+    public void SetAuthenticationGroup(AuthenticationState currentUser)
+
+    {
+        new Claim(ClaimTypes.Role, "Admin");
+        //string userName = currentUser?.User?.Identity?.Name?.ToString();
+
+        //string domain = "lincolnparkri.com";
+
+        //using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domain))
+
+        //{
+
+        //    UserPrincipal windowsUser = UserPrincipal.FindByIdentity(pc, userName);
+
+        //    GroupPrincipal group = GroupPrincipal.FindByIdentity(pc, "App - Compor Definition");
+
+        //    if (windowsUser.IsMemberOf(group))
+
+        //    {
+
+        //        currentUser?.User.AddIdentity(new ClaimsIdentity(new[]
+
+        //        {
+
+        //            new Claim(ClaimTypes.Role, "Admin"),
+
+        //   }, "Admin"));
+
+        //    }
+
+        //}
+
+    }
+
+}
+
+
+
+<AuthorizeView Roles="Admin">
+
+    <Authorized>
+
+
+
+        <NavMenu></NavMenu>
+
+
+
+        <div class="uk-container-expand">
+
+            @Body
+
+        </div>
+
+    </Authorized>
+
+
+
+
+
+    <NotAuthorized>
+
+        <div class="uk-container">
+
+            <div uk-grid="true">
+
+                <div class="uk-width-1-1 uk-margin-xlarge-top">
+
+                    <h1 class="uk-text-center">Authentication Failure!</h1>
+
+                    <h3 class="uk-text-center">You are not allowed on this website.</h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </NotAuthorized>
+
+</AuthorizeView>

@@ -1,0 +1,178 @@
+USE [SomeDatabase]
+
+GO
+
+
+SET ANSI_NULLS ON
+
+GO
+
+SET QUOTED_IDENTIFIER ON
+
+GO
+
+ 
+
+ 
+
+/*
+
+       Author:                    William Stearns
+
+       Create date:  2022-10-17
+
+       Description:  Add Compor to [SomeSchema].[ComporTable] table.
+
+       Notes:              
+
+       History:
+
+             
+
+ 
+
+       exec SomeDatabase.[SomeSchema].AddCompor 1, '1111', 'Test', 'Testers', 'Cage', 2, 250, 'Player Development', 'Y'
+
+*/
+
+ALTER PROCEDURE [SomeSchema].[AddCompor]
+
+       @Testing int,
+
+       @ComporID nvarchar(10),
+
+       @FirstName nvarchar(50),
+
+       @LastName nvarchar(100),
+
+       @ComporLevel nvarchar(50),
+
+       @PercentageOverage decimal(18,0),
+
+       @DollarOverage decimal(18,0),
+
+       @Department nvarchar(25),
+
+       @Enabled nvarchar(1),
+
+       @EmployeeID nvarchar(10)
+
+AS
+
+BEGIN
+
+       SET NOCOUNT ON;
+
+      
+
+       IF @Testing = 1
+
+              begin
+
+                     INSERT INTO [SomeDataWarehouse].[SomeSchema].[ComporTableTest]
+
+                     (
+
+                           [ComporID],
+
+                           [FirstName],
+
+                           [LastName],
+
+                           [ComporLevel],
+
+                           [PercentOverage],
+
+                           [DollarOverage],
+
+                           [Department],
+
+                           [Enabled],
+
+                           [EmployeeID]
+
+                     )
+
+                     Values
+
+                     (
+
+                           @ComporID,
+
+                           @FirstName,
+
+                           @LastName,
+
+                           @ComporLevel,
+
+                           @PercentageOverage,
+
+                           @DollarOverage,
+
+                           @Department,
+
+                           @Enabled,
+
+                           @EmployeeID
+
+                     )
+
+              end
+
+       ELSE
+
+              begin
+
+                     INSERT INTO [SomeDataWarehouse].[SomeSchema].[ComporTable]
+
+                     (
+
+                           [ComporID],
+
+                           [FirstName],
+
+                           [LastName],
+
+                           [ComporLevel],
+
+                           [PercentOverage],
+
+                           [DollarOverage],
+
+                           [Department],
+
+                           [Enabled],
+
+                           [EmployeeID]
+
+                     )
+
+                     Values
+
+                     (
+
+                           @ComporID,
+
+                           @FirstName,
+
+                           @LastName,
+
+                           @ComporLevel,
+
+                           @PercentageOverage,
+
+                           @DollarOverage,
+
+                           @Department,
+
+                           @Enabled,
+
+                           @EmployeeID
+
+                     )
+
+              end
+
+      
+
+END

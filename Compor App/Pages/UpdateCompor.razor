@@ -1,0 +1,342 @@
+﻿@page "/updateCompors/{comporID}/{currentUser}"
+
+@using Compor_App.Data
+
+@inject ComporServices comporServices
+
+@inject NewComporModel comporModel
+
+@inject IJSRuntime JsRuntime
+
+@inject NavigationManager navigationManager
+
+
+
+
+
+@code {
+
+    [Parameter]
+
+    public string? comporID { get; set; }
+
+    [Parameter]
+
+    public string? currentUser { get; set; }
+
+
+
+    //Alerts
+
+    void Alert(string message)
+
+    {
+
+        JsRuntime.InvokeVoidAsync("alert", message);
+
+    }
+
+
+
+    //Get departments and compor levels
+
+    List<string> departments = new List<string>();
+
+    List<string> comporLevels = new List<string>();
+
+    async void GetDepartments()
+
+    {
+
+        departments = await comporServices.GetDistinctDepartments();
+
+    }
+
+    async void GetComporLevels()
+
+    {
+
+        comporLevels = await comporServices.GetDistinctComporLevels();
+
+    }
+
+
+
+    //Get a Compor and display values for updating
+
+    NewComporModel oldComporModel = new NewComporModel();
+
+    NewComporModel newComporModel = new NewComporModel();
+
+    async void GetCompor(string comporID)
+
+    {
+
+        oldComporModel = await comporServices.GetACompor(comporID);
+
+        newComporModel = await comporServices.GetACompor(comporID);
+
+        if (newComporModel.Department == "")
+
+        {
+
+            Alert($"There was an error getting Compor with ID {comporID}");
+
+        }
+
+    }
+
+
+
+    //Update a Compor
+
+    async void UpdateACompor()
+
+    {
+
+        DateTime timeOfUpdate = DateTime.Now;
+
+        var result = await comporServices.UpdateCompor(newComporModel);
+
+        if (result != "worked")
+
+        {
+
+            Alert($"Error : {result}");
+
+        }
+
+        else
+
+        {
+
+            Alert($"You have sucessfully updated {newComporModel.FirstName} {newComporModel.LastName}");
+
+            var oldLogInsertResult = await comporServices.LogComporChange(oldComporModel, "before update", false, currentUser, timeOfUpdate);
+
+            var newLogInsertResult = await comporServices.LogComporChange(newComporModel, "after update", false, currentUser, timeOfUpdate);
+
+            if (newLogInsertResult != "worked" || oldLogInsertResult != "worked")
+
+            {
+
+                Alert($"Error inserting log data : {newLogInsertResult}");
+
+            }
+
+            navigationManager.NavigateTo($"/viewCompors");
+
+        }
+
+    }
+
+
+
+    //on page load override function
+
+    protected override async Task OnInitializedAsync()
+
+    {
+
+        if (comporID != null)
+
+        {
+
+            GetDepartments();
+
+            GetComporLevels();
+
+            GetCompor(comporID);
+
+        }
+
+    }
+
+}
+
+
+
+
+
+<div class="uk-container">
+
+    <div uk-grid="true">
+
+        <div class="uk-width-1-1 uk-margin-small-top">
+
+            <h1 class="">Update Compor</h1>
+
+        </div>
+
+        <div class="uk-width-1-1 ">
+
+            <div class="uk-container-small">
+
+                <form class="uk-form-stacked">
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Compor ID</label>
+
+                        <div class="uk-inline">
+
+                            <input value="@newComporModel.ComporID"
+                                   @onchange="@((ChangeEventArgs __e) => newComporModel.ComporID = __e?.Value?.ToString())"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">First Name</label>
+
+                        <div class="uk-inline">
+
+                            <input value="@newComporModel.FirstName"
+                                   @onchange="@((ChangeEventArgs __e) => newComporModel.FirstName = __e?.Value?.ToString())"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Last Name</label>
+
+                        <div class="uk-inline">
+
+                            <input value="@newComporModel.LastName"
+                                   @onchange="@((ChangeEventArgs __e) => newComporModel.LastName = __e?.Value?.ToString())"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Compor Level</label>
+
+                        <div>
+
+                            <select class="uk-select uk-width-1-3" id="form-stacked-select" @bind="newComporModel.ComporLevel">
+
+                                @foreach (var comporLevel in comporLevels)
+
+                                {
+
+                                    <option value="@comporLevel">
+
+                                        @comporLevel
+
+                                    </option>
+
+                                }
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Percent Overage</label>
+
+                        <div class="uk-inline">
+
+                            <input value="@newComporModel.PercentageOverage"
+                                   @onchange="@((ChangeEventArgs __e) => newComporModel.PercentageOverage = comporModel.TurnStringToDecimal(__e?.Value?.ToString()))"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Dollar Overage</label>
+
+                        <div class="uk-inline">
+
+                            <input value="@newComporModel.DollarOverage"
+                                   @onchange="@((ChangeEventArgs __e) => newComporModel.DollarOverage = comporModel.TurnStringToDecimal(__e?.Value?.ToString()))"
+                                   class="uk-input" type="text">
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Department</label>
+
+                        <div>
+
+                            <select class="uk-select uk-width-1-3" id="form-stacked-select" @bind="newComporModel.Department">
+
+                                @foreach (var department in departments)
+
+                                {
+
+                                    <option value="@department">
+
+                                        @department
+
+                                    </option>
+
+                                }
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <div class="uk-margin">
+
+                        <label class="uk-form-label" for="form-stacked-text">Enabled</label>
+
+                        <div>
+
+                            <select class="uk-select uk-width-1-3" id="form-stacked-select" @bind="newComporModel.Enabled">
+
+                                <option value="Y">
+
+                                    Yes
+
+                                </option>
+
+                                <option value="N">
+
+                                    No
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+
+                </form>
+
+                <button @onclick="@(e =>  UpdateACompor())"
+                        class="uk-button uk-button-primary uk-margin-medium-bottom">
+
+                    Update Compor
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

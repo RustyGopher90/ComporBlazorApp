@@ -1,0 +1,117 @@
+﻿<div>
+
+    <nav class="uk-navbar-container" uk-navbar style="position: relative; z-index: 980;">
+
+        <div class="uk-navbar-left">
+
+            <a class="uk-button uk-button-default uk-hidden@m" uk-toggle="target: #offcanvas-nav"><span class="oi oi-align-left" aria-hidden="true"></span></a>
+
+            <ul class="uk-navbar-nav uk-visible@m">
+
+                <li class="uk-active">
+
+                    <div id="ballysLogoContainer" class="uk-container">
+
+                        <img class=" uk-logo" id="ballysLogo" src="css/images/blys_trlnc_lg_vrt_rgb_pos_210614.png" alt="Ballys Logo" width="350" height="250">
+
+                    </div>
+
+                </li>
+
+                <li class="uk-active">
+
+                    <NavLink class="nav-link" href="viewCompors" Match="NavLinkMatch.All">
+
+                        <span class="oi oi-people" aria-hidden="true"></span> <p class="LinkText">All Compor Definitions</p>
+
+                    </NavLink>
+
+                </li>
+
+                <li>
+
+                    <NavLink class="nav-link" href="addCompors" Match="NavLinkMatch.All">
+
+                        <span class="oi oi-plus" aria-hidden="true"></span> <p class="LinkText">Add a new Compor</p>
+
+                    </NavLink>
+
+                </li>
+
+            </ul>
+
+
+
+        </div>
+
+        <div class="uk-navbar-right">
+
+            <ul class="uk-navbar-nav">
+
+                <li class="uk-margin-medium-right">
+
+                    <LoginDisplay></LoginDisplay>
+
+                </li>
+
+            </ul>
+
+        </div>
+
+    </nav>
+
+</div>
+
+<div id="offcanvas-nav" uk-offcanvas="overlay: true">
+
+    <div class="uk-offcanvas-bar uk-hidden@m">
+
+
+
+        <ul class="uk-nav uk-nav-default">
+
+            <li class="uk-active">
+
+                <div id="ballysLogoContainerMobile" class="uk-container">
+
+                    <img class=" uk-logo" id="ballysLogo" src="css/images/blys_trlnc_lg_vrt_rgb_pos_210614.png" alt="Ballys Logo" width="350" height="250">
+
+                </div>
+
+            </li>
+
+            <li class="uk-nav-divider uk-margin-small-bottom"></li>
+
+            <li class="uk-active uk-margin-small-bottom uk-margin-small-top">
+
+                <NavLink class="nav-link" href="viewCompors" Match="NavLinkMatch.All">
+
+                    <span class="oi oi-people" aria-hidden="true"></span> <p class="LinkText">All Compor Definitions</p>
+
+                </NavLink>
+
+            </li>
+
+            <li>
+
+                <NavLink class="nav-link" href="addCompors" Match="NavLinkMatch.All">
+
+                    <span class="oi oi-plus" aria-hidden="true"></span> <p class="LinkText">Add a new Compor</p>
+
+                </NavLink>
+
+            </li>
+
+        </ul>
+
+
+
+    </div>
+
+</div>
+
+@code {
+
+
+
+}

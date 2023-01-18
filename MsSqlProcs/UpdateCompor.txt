@@ -1,0 +1,126 @@
+
+USE [SomeDatabase]
+
+GO
+
+SET ANSI_NULLS ON
+
+GO
+
+SET QUOTED_IDENTIFIER ON
+
+GO
+
+ 
+
+ 
+
+/*
+
+       Author:                    William Stearns
+
+       Create date:  2022-10-17
+
+       Description:  Add Compor to [SomeSchema].[ComporTable] table.
+
+       Notes:              
+
+       History:
+
+             
+
+ 
+
+       exec Applications.compor.UpdateCompor 1, '00001', 'Foo', 'Bar', 'Pit Manager - Table Games', 10, 250, 'Player Development', 'Y'
+
+*/
+
+ALTER PROCEDURE [SomeSchema].[UpdateCompor]
+
+       @Testing int,
+
+       @ComporID nvarchar(10),
+
+       @FirstName nvarchar(50),
+
+       @LastName nvarchar(100),
+
+       @ComporLevel nvarchar(50),
+
+       @PercentageOverage decimal(18,0),
+
+       @DollarOverage decimal(18,0),
+
+       @Department nvarchar(25),
+
+       @Enabled nvarchar(5)
+
+AS
+
+BEGIN
+
+       SET NOCOUNT ON;
+
+ 
+
+       IF @Testing = 1
+
+              begin
+
+                     update [SomeDataWarehouse].[SomeSchema].[ComporTableTest]
+
+                     set ComporID = @ComporID
+
+                           ,FirstName = @FirstName
+
+                           ,LastName = @LastName
+
+                           ,ComporLevel = @ComporLevel
+
+                           ,PercentOverage = @PercentageOverage
+
+                           ,DollarOverage = @DollarOverage
+
+                           ,Department = @Department
+
+                           ,[Enabled] = @Enabled
+
+                     where  ComporID = @ComporID
+
+                     or (FirstName = @FirstName  and LastName = @LastName)
+
+              end
+
+       ELSE
+
+              begin
+
+                     update [SomeDataWarehouse].[SomeSchema].[ComporTable]
+
+                     set ComporID = @ComporID
+
+                           ,FirstName = @FirstName
+
+                           ,LastName = @LastName
+
+                           ,ComporLevel = @ComporLevel
+
+                           ,PercentOverage = @PercentageOverage
+
+                           ,DollarOverage = @DollarOverage
+
+                           ,Department = @Department
+
+                           ,[Enabled] = @Enabled
+
+                     where ComporID = @ComporID
+
+                     or (FirstName = @FirstName  and LastName = @LastName)
+
+              end
+
+ 
+
+      
+
+END
